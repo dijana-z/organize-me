@@ -11,7 +11,7 @@ Each family member will have a list of tasks assigned to them, see tasks of othe
 - Travis CI
 - Test driven development
 
-## :arrow_right: Getting Started:
+## :arrow_right: Getting Started: [![Build Status](https://travis-ci.com/dijana-z/organize-me.svg?branch=main)](https://travis-ci.com/dijana-z/organize-me)
 To start project, run:
 
 ```docker-compose build```
