@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/dijana-z/organize-me.svg?branch=main)](https://travis-ci.com/dijana-z/organize-me)
 ## :computer: Organize Me
 A project in Django-Rest Framework for home management and organization. The idea is to have groups of individuals inside one household and to manage time and resources within the household and individuals (family members) themselves.
 
@@ -11,7 +12,7 @@ Each family member will have a list of tasks assigned to them, see tasks of othe
 - Travis CI
 - Test driven development
 
-## :arrow_right: Getting Started: [![Build Status](https://travis-ci.com/dijana-z/organize-me.svg?branch=main)](https://travis-ci.com/dijana-z/organize-me)
+## :arrow_right: Getting Started:
 To start project, run:
 
 ```docker-compose build```
