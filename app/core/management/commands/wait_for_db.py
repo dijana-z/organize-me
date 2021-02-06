@@ -1,6 +1,6 @@
 import time
 
-from django.db import connection
+from django.db import connections
 from django.db.utils import OperationalError
 from django.core.management.base import BaseCommand
 
@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
         while not db_connection:
             try:
-                db_connection = connection['default']
+                db_connection = connections['default']
             except OperationalError:
                 self.stdout.write('Database unavailable, waiting one second.')
                 time.sleep(1)
