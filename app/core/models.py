@@ -4,9 +4,14 @@ from django.contrib.auth.models import AbstractBaseUser, \
                                        PermissionsMixin
 
 
+class Household(models.Model):
+
+    name = models.CharField(max_length=255, unique=True)
+
+
 class UserManager(BaseUserManager):
     """Custom User Manager with helper functions."""
-    def create_user(self, email, password=None, **other_fields):
+    def create_user(self, email, password=None, household='', **other_fields):
         """Creates and saves a new user."""
         if not email:
             raise ValueError('Email must not be an empty field.')
@@ -14,13 +19,16 @@ class UserManager(BaseUserManager):
         if not password:
             password = self.make_random_password()
         user.set_password(password)
+        if household:
+            hh = Household.objects.get_or_create(name=household)
+            user.household = hh[0]
         user.save(using=self._db)
 
         return user
 
-    def create_superuser(self, email, password):
+    def create_superuser(self, email, password, household=''):
         """Creates and saves a new superuser."""
-        user = self.create_user(email, password)
+        user = self.create_user(email, password, household)
         user.is_staff = True
         user.is_superuser = True
 
@@ -37,6 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    household = models.ForeignKey(to=Household, on_delete=models.CASCADE)
 
     # Create user manager object
     objects = UserManager()
