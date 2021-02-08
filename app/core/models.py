@@ -45,7 +45,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    household = models.ForeignKey(to=Household, on_delete=models.CASCADE)
+    household = models.ForeignKey(to=Household, on_delete=models.CASCADE,
+                                  null=True)
 
     # Create user manager object
     objects = UserManager()
