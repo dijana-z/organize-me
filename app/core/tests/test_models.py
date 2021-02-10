@@ -33,6 +33,8 @@ class ModelTests(TestCase):
             password=password,
         )
 
+        e1, e2 = email.split('@')
+        email = '@'.join([e1, e2.lower()])
         self.assertEqual(user.email, email.lower())
 
     def test_users_with_invalid_email_fails(self):
@@ -64,16 +66,15 @@ class ModelTests(TestCase):
 
     def test_add_user_to_existing_household(self):
         """Tests adding a new user to household."""
-        household = 'Test Household'
-        household = Household.objects.create(
-            name=household)
+        household_name = 'Test Household'
+
         user = get_user_model().objects.create_user(
             email='test@test.com',
             password='TestPass123',
-            household=household,
+            household=household_name,
         )
 
-        self.assertEqual(user.household.name, household)
+        self.assertEqual(user.household.name, household_name)
 
     def test_add_user_to_non_existing_household(self):
         """Tests that adding a user to non-existing household fails."""

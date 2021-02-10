@@ -20,8 +20,9 @@ class UserManager(BaseUserManager):
             password = self.make_random_password()
         user.set_password(password)
         if household:
-            hh = Household.objects.get_or_create(name=household)
-            user.household = hh[0]
+            hh = Household.objects.get_or_create(name=household)[0]
+            user.household = hh
+            hh.save(using=self._db)
         user.save(using=self._db)
 
         return user
