@@ -18,8 +18,8 @@ def grocery_image_file_path(instance, file_path):
 class Household(models.Model):
 
     name = models.CharField(max_length=255, unique=True)
-    grocery_list = models.ManyToManyField('Grocery')
-    shopping_list = models.ManyToManyField('Grocery')
+    grocery_list = models.ManyToManyField('Grocery', related_name='grocery')
+    shopping_list = models.ManyToManyField('Grocery', related_name='shopping')
 
 
 class UserManager(BaseUserManager):
