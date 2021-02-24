@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-from ..models import Household
+from ..models import Household, Grocery
 
 
 def create_sample_user(email='test@test.com',
@@ -103,3 +103,74 @@ class ModelTests(TestCase):
 
         self.assertEqual(user1.household.name, household.name)
         self.assertEqual(user2.household.name, household.name)
+
+    def test_grocery_str(self):
+        """Tests grocery string representation."""
+        grocery = Grocery.objects.create(
+            name='Olive Oil',
+            quantity=2,
+        )
+
+        self.assertEqual(str(grocery), f'{grocery.name}: {grocery.quantity}')
+
+    def test_adding_groceries_to_grocery_list(self):
+        """Tests adding one, two and many groceries to grocery list."""
+        grocery1 = Grocery.objects.create(
+            name='Olive Oil',
+            quantity=2
+        )
+        household = Household.objects.get_or_create(name='Test Household')[0]
+        household.grocery_list.add(grocery1)
+
+        self.assertEqual(len(household.grocery_list.all()), 1)
+
+        grocery2 = Grocery.objects.create(
+            name='Sesame Seeds',
+            quantity=1
+        )
+        household.grocery_list.add(grocery2)
+
+        self.assertEqual(len(household.grocery_list.all()), 2)
+
+        grocery3 = Grocery.objects.create(
+            name='Burger Buns',
+            quantity=5
+        )
+        grocery4 = Grocery.objects.create(
+            name='Dijon',
+            quantity=2
+        )
+        household.grocery_list.add(grocery3, grocery4)
+
+        self.assertEqual(len(household.grocery_list.all()), 4)
+
+    def test_adding_groceries_to_shopping_list(self):
+        """Tests adding one, two and many groceries to shopping list."""
+        grocery1 = Grocery.objects.create(
+            name='Olive Oil',
+            quantity=2
+        )
+        household = Household.objects.get_or_create(name='Test Household')[0]
+        household.shopping_list.add(grocery1)
+
+        self.assertEqual(len(household.shopping_list.all()), 1)
+
+        grocery2 = Grocery.objects.create(
+            name='Sesame Seeds',
+            quantity=1
+        )
+        household.shopping_list.add(grocery2)
+
+        self.assertEqual(len(household.shopping_list.all()), 2)
+
+        grocery3 = Grocery.objects.create(
+            name='Burger Buns',
+            quantity=5
+        )
+        grocery4 = Grocery.objects.create(
+            name='Dijon',
+            quantity=2
+        )
+        household.shopping_list.add(grocery3, grocery4)
+
+        self.assertEqual(len(household.shopping_list.all()), 4)
