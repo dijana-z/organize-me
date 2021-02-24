@@ -1,18 +1,7 @@
-import uuid
-from pathlib import Path
-
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, \
                                        BaseUserManager, \
                                        PermissionsMixin
-
-
-def grocery_image_file_path(instance, file_path):
-    """Generate file path for new grocery image."""
-    ext = Path(file_path).prefix
-    file_name = f'{uuid.uuid4()}{ext}'
-
-    return str(Path('uploads/groceries').joinpath(file_name))
 
 
 class Household(models.Model):
@@ -73,7 +62,8 @@ class Grocery(models.Model):
     """Custom grocery item."""
     name = models.CharField(max_length=100)
     quantity = models.IntegerField()
-    image = models.ImageField(null=True, upload_to=grocery_image_file_path)
+    household = models.ForeignKey(to=Household,
+                                  on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.name}: {self.quantity}'

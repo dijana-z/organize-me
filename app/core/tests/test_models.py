@@ -10,6 +10,10 @@ def create_sample_user(email='test@test.com',
     return get_user_model().objects.create_user(email, password)
 
 
+def create_sample_household():
+    return Household.objects.create(name='Test Household')
+
+
 class ModelTests(TestCase):
 
     def test_create_user_with_email_ok(self):
@@ -66,30 +70,29 @@ class ModelTests(TestCase):
 
     def test_add_user_to_existing_household(self):
         """Tests adding a new user to household."""
-        household_name = 'Test Household'
+        household = create_sample_household()
 
         user = get_user_model().objects.create_user(
             email='test@test.com',
             password='TestPass123',
-            household=household_name,
+            household=household.name,
         )
 
-        self.assertEqual(user.household.name, household_name)
+        self.assertEqual(user.household.name, household.name)
 
     def test_add_user_to_non_existing_household(self):
         """Tests that adding a user to non-existing household fails."""
-        household = 'Test Household'
         user = get_user_model().objects.create_user(
             email='test@test.com',
             password='TestPass123',
-            household=household,
+            household='Household',
         )
 
-        self.assertEqual(user.household.name, household)
+        self.assertEqual(user.household.name, 'Household')
 
     def test_multiple_users_in_one_household(self):
         """Tests adding multiple users to one household."""
-        household = Household.objects.get_or_create(name='Test Household')[0]
+        household = create_sample_household()
         user1 = get_user_model().objects.create_user(
             email='test@test.com',
             password='TestPass123',
@@ -106,27 +109,31 @@ class ModelTests(TestCase):
 
     def test_grocery_str(self):
         """Tests grocery string representation."""
+        household = create_sample_household()
         grocery = Grocery.objects.create(
             name='Olive Oil',
             quantity=2,
+            household=household
         )
 
         self.assertEqual(str(grocery), f'{grocery.name}: {grocery.quantity}')
 
     def test_adding_groceries_to_grocery_list(self):
         """Tests adding one, two and many groceries to grocery list."""
+        household = create_sample_household()
         grocery1 = Grocery.objects.create(
             name='Olive Oil',
-            quantity=2
+            quantity=2,
+            household=household
         )
-        household = Household.objects.get_or_create(name='Test Household')[0]
         household.grocery_list.add(grocery1)
 
         self.assertEqual(len(household.grocery_list.all()), 1)
 
         grocery2 = Grocery.objects.create(
             name='Sesame Seeds',
-            quantity=1
+            quantity=1,
+            household=household
         )
         household.grocery_list.add(grocery2)
 
@@ -134,11 +141,13 @@ class ModelTests(TestCase):
 
         grocery3 = Grocery.objects.create(
             name='Burger Buns',
-            quantity=5
+            quantity=5,
+            household=household
         )
         grocery4 = Grocery.objects.create(
             name='Dijon',
-            quantity=2
+            quantity=2,
+            household=household
         )
         household.grocery_list.add(grocery3, grocery4)
 
@@ -146,18 +155,21 @@ class ModelTests(TestCase):
 
     def test_adding_groceries_to_shopping_list(self):
         """Tests adding one, two and many groceries to shopping list."""
+        household = create_sample_household()
         grocery1 = Grocery.objects.create(
             name='Olive Oil',
-            quantity=2
+            quantity=2,
+            household=household
         )
-        household = Household.objects.get_or_create(name='Test Household')[0]
+
         household.shopping_list.add(grocery1)
 
         self.assertEqual(len(household.shopping_list.all()), 1)
 
         grocery2 = Grocery.objects.create(
             name='Sesame Seeds',
-            quantity=1
+            quantity=1,
+            household=household
         )
         household.shopping_list.add(grocery2)
 
@@ -165,11 +177,13 @@ class ModelTests(TestCase):
 
         grocery3 = Grocery.objects.create(
             name='Burger Buns',
-            quantity=5
+            quantity=5,
+            household=household
         )
         grocery4 = Grocery.objects.create(
             name='Dijon',
-            quantity=2
+            quantity=2,
+            household=household
         )
         household.shopping_list.add(grocery3, grocery4)
 

@@ -6,7 +6,23 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 
+from core.models import Household, Grocery
+
+
 HOUSEHOLD_URL = reverse('household:household-list')
+
+
+def create_sample_household():
+    return Household.objects.create(name='Test Household')
+
+
+def create_sample_grocery_item():
+    household = create_sample_household()
+    return Grocery.objects.create(
+        name='Test Grocery',
+        quantity=1,
+        household=household
+    )
 
 
 class PublicHouseholdApiTests(TestCase):
@@ -18,6 +34,15 @@ class PublicHouseholdApiTests(TestCase):
     def test_get_household_not_successful(self):
         """Tests that getting the household information fails."""
         res = self.client.get(HOUSEHOLD_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_create_household_not_successful(self):
+        """Tests that creating a new household fails."""
+        payload = {
+            'name': 'Test Household 1'
+        }
+        res = self.client.post(HOUSEHOLD_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -41,3 +66,18 @@ class PrivateHouseholdApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(self.user.household.id, res.data[0]['id'])
+
+    def test_create_new_household(self):
+        """Tests that creating a new household is successfull."""
+        user = get_user_model().objects.create_user(
+            email='test1@test.com',
+            password='TestPass1',
+            name='Test User 1',
+        )
+        self.client.force_authenticate(user)
+        payload = {
+            'name': 'Test Household 1'
+        }
+        res = self.client.post(HOUSEHOLD_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
