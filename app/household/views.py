@@ -28,9 +28,6 @@ class HouseholdViewset(viewsets.ModelViewSet):
 
         return queryset.filter(user=self.request.user)
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
 
 class GroceryViewSet(viewsets.ModelViewSet):
     """Viewset for grocery item."""

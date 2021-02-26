@@ -5,7 +5,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-# from core.models import Household
+from core.models import Household, Grocery
 
 # from household.serializers import GrocerySerializer
 
@@ -13,6 +13,10 @@ from rest_framework.test import APIClient
 GROCERY_URL = reverse('household:grocery-list')
 GROCERY_LIST_URL = reverse('household:grocerylist-list')
 SHOPPING_LIST_URL = reverse('household:shoppinglist-list')
+
+
+def get_grocery_detail_url(grocery_id):
+    return reverse('household:grocery-detail', args=[grocery_id])
 
 
 class PublicGroceryApiTests(TestCase):
@@ -59,14 +63,53 @@ class PrivateGroceryApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
-    # def test_post_grocery(self):
-    #     household = Household.objects.filter(name=self.user.household.name)
-    #     payload = {
-    #         'name': 'Test Grocery',
-    #         'quantity': 2,
-    #         'household': household.name
-    #     }
-    #
-    #     res = self.client.post(GROCERY_URL, payload)
-    #
-    #     self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+    def test_post_grocery(self):
+        """Tests creating a new grocery."""
+        household = Household.objects.filter(name=self.user.household.name).first()
+        payload = {
+            'household': household.id,
+            'name': 'Test Grocery',
+            'quantity': 3,
+        }
+
+        res = self.client.post(GROCERY_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+    def test_patch_grocery(self):
+        """Tests updating a grocery via PATCH."""
+        household = Household.objects.filter(name=self.user.household.name).first()
+        grocery = Grocery.objects.create(
+            name='Test Grocery',
+            quantity=1,
+            household=household
+        )
+
+        payload = {
+            'name': 'Test Grocery 1',
+        }
+
+        self.client.patch(get_grocery_detail_url(grocery.id), payload)
+        grocery.refresh_from_db()
+
+        self.assertEqual(grocery.name, payload['name'])
+
+    def test_put_grocery(self):
+        """Tests updating a grocery via PUT."""
+        household = Household.objects.filter(name=self.user.household.name).first()
+        grocery = Grocery.objects.create(
+            name='Test Grocery',
+            quantity=1,
+            household=household
+        )
+
+        payload = {
+            'name': 'Test Grocery 1',
+            'quantity': 2,
+            'household': household.id
+        }
+
+        self.client.patch(get_grocery_detail_url(grocery.id), payload)
+        grocery.refresh_from_db()
+
+        self.assertEqual(grocery.name, payload['name'])
