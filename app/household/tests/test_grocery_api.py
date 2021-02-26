@@ -7,7 +7,7 @@ from rest_framework.test import APIClient
 
 from core.models import Household, Grocery
 
-# from household.serializers import GrocerySerializer
+from household.serializers import GrocerySerializer
 
 
 GROCERY_URL = reverse('household:grocery-list')
@@ -17,6 +17,19 @@ SHOPPING_LIST_URL = reverse('household:shoppinglist-list')
 
 def get_grocery_detail_url(grocery_id):
     return reverse('household:grocery-detail', args=[grocery_id])
+
+
+def get_user_household(user):
+    return Household.objects.filter(
+        name=user.household.name).first()
+
+
+def create_test_grocery_for_user(user):
+    return Grocery.objects.create(
+            name='Test Grocery',
+            quantity=1,
+            household=get_user_household(user)
+        )
 
 
 class PublicGroceryApiTests(TestCase):
@@ -65,7 +78,7 @@ class PrivateGroceryApiTests(TestCase):
 
     def test_post_grocery(self):
         """Tests creating a new grocery."""
-        household = Household.objects.filter(name=self.user.household.name).first()
+        household = get_user_household(self.user)
         payload = {
             'household': household.id,
             'name': 'Test Grocery',
@@ -78,12 +91,7 @@ class PrivateGroceryApiTests(TestCase):
 
     def test_patch_grocery(self):
         """Tests updating a grocery via PATCH."""
-        household = Household.objects.filter(name=self.user.household.name).first()
-        grocery = Grocery.objects.create(
-            name='Test Grocery',
-            quantity=1,
-            household=household
-        )
+        grocery = create_test_grocery_for_user(self.user)
 
         payload = {
             'name': 'Test Grocery 1',
@@ -96,12 +104,8 @@ class PrivateGroceryApiTests(TestCase):
 
     def test_put_grocery(self):
         """Tests updating a grocery via PUT."""
-        household = Household.objects.filter(name=self.user.household.name).first()
-        grocery = Grocery.objects.create(
-            name='Test Grocery',
-            quantity=1,
-            household=household
-        )
+        household = get_user_household(self.user)
+        grocery = create_test_grocery_for_user(self.user)
 
         payload = {
             'name': 'Test Grocery 1',
@@ -113,3 +117,12 @@ class PrivateGroceryApiTests(TestCase):
         grocery.refresh_from_db()
 
         self.assertEqual(grocery.name, payload['name'])
+
+    def test_view_grocery_detail(self):
+        """Tests viewing a grocery detail."""
+        grocery = create_test_grocery_for_user(self.user)
+
+        res = self.client.get(get_grocery_detail_url(grocery.id))
+        serializer = GrocerySerializer(grocery)
+
+        self.assertEqual(res.data, serializer.data)
