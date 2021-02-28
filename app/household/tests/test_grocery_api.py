@@ -126,3 +126,19 @@ class PrivateGroceryApiTests(TestCase):
         serializer = GrocerySerializer(grocery)
 
         self.assertEqual(res.data, serializer.data)
+
+    def test_view_grocery_list(self):
+        """Tests getting the grocery list from household."""
+        res = self.client.get(GROCERY_LIST_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_view_shopping_list(self):
+        """Tests getting the shopping list from household."""
+        res = self.client.get(SHOPPING_LIST_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_add_grocery_to_grocery_list(self):
+        """"""
+        pass

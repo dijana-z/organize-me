@@ -1,4 +1,4 @@
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
@@ -6,7 +6,7 @@ from core.models import Household, Grocery
 from household import serializers
 
 
-class HouseholdViewset(viewsets.ModelViewSet):
+class HouseholdViewset(viewsets.ModelViewSet, viewsets.GenericViewSet):
     """Viewset for the household."""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -36,6 +36,15 @@ class GroceryViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    def perform_create(self, serializer):
+        """Save grocery in user household."""
+        serializer.save(household=self.request.user.household)
+
+    def get_queryset(self):
+        """Return only groceries in user household."""
+        household = self.request.user.household
+        return self.queryset.filter(household=household)
+
 
 class GroceryListViewSet(viewsets.GenericViewSet,
                          mixins.ListModelMixin,
@@ -47,8 +56,18 @@ class GroceryListViewSet(viewsets.GenericViewSet,
     def get_queryset(self):
         """Return objects for the current authenticated user only."""
         household = self.request.user.household
-        return self.queryset.filter(household=household).\
-            orderby('-name').distinct()
+        queryset = Household.objects.filter(name=household.name)
+        return queryset[0].grocery_list
+
+    def perform_create(self, serializer):
+        """Create a new item in grocery list."""
+        household = Household.objects.filter(
+            name=self.request.user.household.name)[0]
+        grocery = Grocery.objects.create(**serializer.validated_data,
+                                         household=household)
+        household.grocery_list.add(grocery)
+        household.save()
+        serializer.save(household=self.request.user.household)
 
 
 class ShoppingListViewSet(viewsets.GenericViewSet,
@@ -61,5 +80,15 @@ class ShoppingListViewSet(viewsets.GenericViewSet,
     def get_queryset(self):
         """Return objects for the current authenticated user only."""
         household = self.request.user.household
-        return self.queryset.filter(household=household).\
-            orderby('-name').distinct()
+        queryset = Household.objects.filter(name=household.name)
+        return queryset[0].shopping_list
+
+    def perform_create(self, serializer):
+        """Create a new item in shopping list."""
+        household = Household.objects.filter(
+            name=self.request.user.household.name)[0]
+        grocery = Grocery.objects.create(**serializer.validated_data,
+                                         household=household)
+        household.shopping_list.add(grocery)
+        household.save()
+        serializer.save(household=self.request.user.household)

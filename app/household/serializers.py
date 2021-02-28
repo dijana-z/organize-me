@@ -6,11 +6,15 @@ class HouseholdSerializer(serializers.ModelSerializer):
     """Serializer to household object."""
     grocery_list = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=Grocery.objects.all()
+        queryset=Grocery.objects.all(),
+        allow_null=True,
+        allow_empty=True
     )
     shopping_list = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=Grocery.objects.all()
+        queryset=Grocery.objects.all(),
+        allow_null=True,
+        allow_empty=True
     )
 
     class Meta:
@@ -29,8 +33,18 @@ class GrocerySerializer(serializers.ModelSerializer):
 
 
 class ShoppingListSerializer(HouseholdSerializer):
-    shopping = GrocerySerializer(many=True, read_only=False)
+    shopping_list = GrocerySerializer(many=True, read_only=False)
+
+    class Meta:
+        model = Grocery
+        fields = ('id', 'name', 'quantity')
+        read_only_fields = ('id',)
 
 
 class GroceryListSerializer(HouseholdSerializer):
-    groceries = GrocerySerializer(many=True, read_only=False)
+    grocery_list = GrocerySerializer(many=True, read_only=False)
+
+    class Meta:
+        model = Grocery
+        fields = ('id', 'name', 'quantity')
+        read_only_fields = ('id',)

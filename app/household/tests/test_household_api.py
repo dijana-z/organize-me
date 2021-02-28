@@ -12,6 +12,10 @@ from core.models import Household, Grocery
 HOUSEHOLD_URL = reverse('household:household-list')
 
 
+def get_household_detail_url(household_id):
+    return reverse('household:household-detail', args=[household_id])
+
+
 def create_sample_household():
     return Household.objects.create(name='Test Household')
 
@@ -68,7 +72,7 @@ class PrivateHouseholdApiTests(TestCase):
         self.assertEqual(self.user.household.id, res.data[0]['id'])
 
     def test_create_new_household(self):
-        """Tests that creating a new household is successfull."""
+        """Tests that creating a new household is successful."""
         user = get_user_model().objects.create_user(
             email='test1@test.com',
             password='TestPass1',
@@ -81,3 +85,24 @@ class PrivateHouseholdApiTests(TestCase):
         res = self.client.post(HOUSEHOLD_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+    def test_patch_household(self):
+        """Tests partial household update (PATCH)."""
+        payload = {
+            'name': 'Test Household Changed'
+        }
+        res = self.client.patch(get_household_detail_url(
+            self.user.household.id), payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_put_household(self):
+        payload = {
+            'name': 'Test Household Changed',
+            'grocery_list': [],
+            'shopping_list': []
+        }
+        res = self.client.patch(get_household_detail_url(
+            self.user.household.id), payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
