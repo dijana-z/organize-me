@@ -7,6 +7,8 @@ from django.contrib.auth.models import AbstractBaseUser, \
 class Household(models.Model):
 
     name = models.CharField(max_length=255, unique=True)
+    grocery_list = models.ManyToManyField('Grocery', related_name='grocery')
+    shopping_list = models.ManyToManyField('Grocery', related_name='shopping')
 
 
 class UserManager(BaseUserManager):
@@ -20,8 +22,9 @@ class UserManager(BaseUserManager):
             password = self.make_random_password()
         user.set_password(password)
         if household:
-            hh = Household.objects.get_or_create(name=household)
-            user.household = hh[0]
+            hh = Household.objects.get_or_create(name=household)[0]
+            user.household = hh
+            hh.save(using=self._db)
         user.save(using=self._db)
 
         return user
@@ -53,3 +56,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # Replace login username field with email
     USERNAME_FIELD = 'email'
+
+
+class Grocery(models.Model):
+    """Custom grocery item."""
+    name = models.CharField(max_length=100)
+    quantity = models.PositiveIntegerField()
+    household = models.ForeignKey(to=Household,
+                                  on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.name}: {self.quantity}'
