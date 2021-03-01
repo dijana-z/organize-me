@@ -61,7 +61,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Grocery(models.Model):
     """Custom grocery item."""
     name = models.CharField(max_length=100)
-    quantity = models.IntegerField()
+    quantity = models.PositiveIntegerField()
     household = models.ForeignKey(to=Household,
                                   on_delete=models.CASCADE)
 

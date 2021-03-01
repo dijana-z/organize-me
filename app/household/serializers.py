@@ -28,7 +28,7 @@ class GrocerySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Grocery
-        fields = ('id', 'name', 'quantity', 'household')
+        fields = ('id', 'name', 'quantity')
         read_only_fields = ('id',)
 
 

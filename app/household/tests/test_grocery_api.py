@@ -78,9 +78,7 @@ class PrivateGroceryApiTests(TestCase):
 
     def test_post_grocery(self):
         """Tests creating a new grocery."""
-        household = get_user_household(self.user)
         payload = {
-            'household': household.id,
             'name': 'Test Grocery',
             'quantity': 3,
         }
@@ -140,5 +138,62 @@ class PrivateGroceryApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_add_grocery_to_grocery_list(self):
-        """"""
-        pass
+        """Tests adding grocery to grocery list."""
+        payload = {
+            'name': 'Test Grocery',
+            'quantity': 1
+        }
+        res = self.client.post(GROCERY_LIST_URL, payload)
+        household = get_user_household(self.user)
+        household.refresh_from_db()
+        grocery = household.grocery_list.all().first()
+        serializer = GrocerySerializer(grocery)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(payload['name'], serializer.data['name'])
+        self.assertEqual(payload['quantity'], serializer.data['quantity'])
+
+    def test_add_grocery_to_shopping_list(self):
+        """Tests adding grocery to grocery list."""
+        payload = {
+            'name': 'Test Grocery',
+            'quantity': 1
+        }
+        res = self.client.post(SHOPPING_LIST_URL, payload)
+        household = get_user_household(self.user)
+        household.refresh_from_db()
+        grocery = household.shopping_list.all().first()
+        serializer = GrocerySerializer(grocery)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(payload['name'], serializer.data['name'])
+        self.assertEqual(payload['quantity'], serializer.data['quantity'])
+
+    def test_delete_grocery(self):
+        """Tests deleting a grocery item."""
+        payload = {
+            'name': 'Test Grocery',
+            'quantity': 5,
+        }
+        res = self.client.post(GROCERY_URL, payload)
+        res = self.client.delete(get_grocery_detail_url(res.data['id']))
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_adding_empty_grocery_name(self):
+        """Tests that creating a grocery without a name fails."""
+        payload = {
+            'name': '',
+            'quantity': 5,
+        }
+        res = self.client.post(GROCERY_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_adding_invalid_grocery_quantity(self):
+        """Tests that creating a grocery with invalid quantity fails."""
+        payload = {
+            'name': 'Test',
+            'quantity': -10,
+        }
+        res = self.client.post(GROCERY_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
